@@ -89,7 +89,7 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+
 const days=d=>Math.round((new Date(d+'T00:00:00')-new Date(today()+'T00:00:00'))/864e5);
 const money=(n,c)=>{try{return new Intl.NumberFormat('en',{style:'currency',currency:c||'USD',maximumFractionDigits:0}).format(n||0)}catch(_){return (n||0)+' '+c}};
 const num=v=>Math.max(0,parseFloat(v)||0);
-let rows=[],view='dash',q='',fs='',outOnly=false,db=null,DL=null,editId=null,FB=null,unsub=null,authMsg='';
+let rows=[],view='dash',q='',fs='',outOnly=false,db=null,DL=null,editId=null,FB=null,unsub=null,unsubO=null,authMsg='';
 const ids=()=>'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function norm(r){const m={'In progress':'In Progress','Delivered':'Completed','Paid':'Closed'};return m[r.stage]?{...r,stage:'Ordered',pstatus:r.pstatus||m[r.stage]}:r}
 const pst=r=>r.pstatus||(r.stage==='Ordered'?'Pending':'');
@@ -116,16 +116,27 @@ async function initFirebase(){
   const app=A.initializeApp(FIREBASE_CONFIG),auth=Au.getAuth(app),fs=Fs.getFirestore(app);
   FB={Au,Fs,auth,fs};$('#sync').textContent='Please sign in';
   Au.onAuthStateChanged(auth,u=>{
-   if(unsub){unsub();unsub=null}
+   if(unsub){unsub();unsub=null}if(unsubO){unsubO();unsubO=null}
    if(!u){view='login';rows=[];$('#out').hidden=true;render();return}
    if(u.email!==ALLOWED_EMAIL){authMsg='This account is not allowed: '+u.email;Au.signOut(auth);return}
    authMsg='';$('#out').hidden=false;$('#sync').textContent='Synced with Firebase · '+u.email;
    if(view==='login')view='dash';
    unsub=Fs.onSnapshot(Fs.collection(fs,'clients'),s=>{rows=s.docs.map(x=>norm({id:x.id,...x.data()}));render()},e=>toast('Could not load data ('+(e.code||'error')+')'));
+   unsubO=Fs.onSnapshot(Fs.collection(fs,'orders'),q=>q.docs.forEach(importOrder),()=>{});
   });
  }catch(e){$('#sync').textContent='Firebase could not start';authMsg='Firebase error: '+(e.code||e.message);render()}
  try{DL=window.claude&&await window.claude.use('downloads');if(DL)$('#exp').hidden=false}catch(_){}
 }
+const importing=new Set();
+const svMap=v=>v==='Brand Identity Design'?'Brand Identity':v==='Book Cover Design'?'Book Cover':SV.includes(v)?v:'Other';
+async function importOrder(x){
+ const id=x.id,o=x.data();if(importing.has(id))return;importing.add(id);
+ try{const {Fs,fs}=FB,ref=Fs.doc(fs,'clients',id);
+  if(!(await Fs.getDoc(ref)).exists()){
+   await Fs.setDoc(ref,{name:o.name||'Website visitor',contact:[o.email,o.phone].filter(Boolean).join(' · '),service:svMap(o.service),source:'Website order',stage:'Lead',pstatus:'',project:'',followUp:today(),deadline:'',currency:'USD',quote:0,received:0,notes:o.message||'',isNew:true,created:Date.now(),updated:Date.now(),log:[{d:today(),t:'New order from website: '+(o.service||'')}]});
+   toast('New website order from '+(o.name||'a visitor'))}
+  await Fs.deleteDoc(Fs.doc(fs,'orders',id))}
+ catch(e){importing.delete(id);toast('Could not import an order ('+(e.code||'error')+')')}}
 async function signIn(){const {Au,auth}=FB;try{await Au.signInWithPopup(auth,new Au.GoogleAuthProvider())}catch(e){
  if(['auth/popup-blocked','auth/cancelled-popup-request'].includes(e.code))Au.signInWithRedirect(auth,new Au.GoogleAuthProvider());else{authMsg='Sign-in failed: '+(e.code||e.message);render()}}}
 async function init(){
@@ -138,8 +149,8 @@ async function init(){
   $('#sync').textContent='Saved on this device only';render()}
  try{DL=window.claude&&await window.claude.use('downloads');if(DL)$('#exp').hidden=false}catch(_){}}
 /* ---------- views ---------- */
-function followChip(r){if(!r.followUp||!open(r))return '';const n=days(r.followUp);
- return n<0?`<span class="chip bad">Follow-up overdue</span>`:n===0?`<span class="chip warn">Follow up today</span>`:`<span class="chip">Follow up ${esc(r.followUp.slice(5))}</span>`}
+function followChip(r){const nw=r.isNew?'<span class="chip ok">New order</span>':'';if(!r.followUp||!open(r))return nw;const n=days(r.followUp);
+ return nw+(n<0?`<span class="chip bad">Follow-up overdue</span>`:n===0?`<span class="chip warn">Follow up today</span>`:`<span class="chip">Follow up ${esc(r.followUp.slice(5))}</span>`)}
 function dlChip(r){if(!r.deadline)return '';const n=days(r.deadline);
  return n<0?`<span class="chip bad">${-n}d overdue</span>`:n===0?`<span class="chip warn">Due today</span>`:`<span class="chip ${n<=3?'warn':'ac'}">${n}d left</span>`}
 function item(r,sub,right){return `<button class="it" data-id="${r.id}"><div><b>${esc(r.name)}</b><small>${esc(sub)}</small></div><div>${right}</div></button>`}
@@ -205,7 +216,7 @@ function openM(id){
 function closeM(){$('#m').hidden=true;document.body.style.overflow='';editId=null}
 async function save(e){
  e.preventDefault();const f=e.target,old=rows.find(x=>x.id===editId)||{},g=n=>f.elements[n].value.trim();
- const r={...old,id:editId||ids(),name:g('name'),contact:g('contact'),service:g('service'),source:g('source'),stage:g('stage'),pstatus:g('pstatus'),project:g('project'),followUp:g('followUp'),deadline:g('deadline'),currency:g('currency'),quote:num(g('quote')),received:num(g('received')),notes:g('notes'),created:old.created||Date.now(),log:[...(old.log||[])]};
+ const r={...old,id:editId||ids(),name:g('name'),contact:g('contact'),service:g('service'),source:g('source'),stage:g('stage'),pstatus:g('pstatus'),project:g('project'),followUp:g('followUp'),deadline:g('deadline'),currency:g('currency'),quote:num(g('quote')),received:num(g('received')),notes:g('notes'),isNew:false,created:old.created||Date.now(),log:[...(old.log||[])]};
  if(r.stage==='Ordered'&&!r.pstatus)r.pstatus='Pending';
  const log=t=>r.log.push({d:today(),t});
  if(!editId)log('Added as '+r.stage+' via '+r.source);else {if(old.stage!==r.stage)log('Stage: '+old.stage+' → '+r.stage);if(pst(old)!==pst(r))log('Project: '+(pst(old)||'—')+' → '+(pst(r)||'—'))}
@@ -217,7 +228,7 @@ $('#tabs').onclick=e=>{const b=e.target.closest('button');if(b){view=b.dataset.t
 $('#add').onclick=()=>openM(null);
 $('#v').onclick=async e=>{
  const n=e.target.closest('[data-next]');
- if(n){e.stopPropagation();const r=rows.find(x=>x.id===n.dataset.next);const to=ST[ST.indexOf(r.stage)+1];await put({...r,stage:to,...(to==='Ordered'&&!pst(r)?{pstatus:'Pending'}:{}),log:[...(r.log||[]),{d:today(),t:'Stage: '+r.stage+' → '+to}]});toast('Moved to '+to);return}
+ if(n){e.stopPropagation();const r=rows.find(x=>x.id===n.dataset.next);const to=ST[ST.indexOf(r.stage)+1];await put({...r,isNew:false,stage:to,...(to==='Ordered'&&!pst(r)?{pstatus:'Pending'}:{}),log:[...(r.log||[]),{d:today(),t:'Stage: '+r.stage+' → '+to}]});toast('Moved to '+to);return}
  const pn=e.target.closest('[data-pn]');
  if(pn){e.stopPropagation();const [id,dr]=pn.dataset.pn.split('|');const r=rows.find(x=>x.id===id),i=PS.indexOf(pst(r)),to=PS[i+Number(dr)];await put({...r,pstatus:to,log:[...(r.log||[]),{d:today(),t:'Project: '+PS[i]+' → '+to}]});toast('Moved to '+to);return}
  if(e.target.id==='gs'){signIn();return}

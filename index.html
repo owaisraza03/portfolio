@@ -291,11 +291,17 @@ async function sendAll(d){
  catch(_){errs.push('Formspree: network blocked')}
  return {ok:false,errs};
 }
-function wire(f,thanks,label){
+const FS_PID='crm-database-4df53',FS_KEY='AIzaSyARVMYrFfFqcd5SNltIYSAgERjek4yxlSc';
+async function saveOrder(d){
+ const v=k=>({stringValue:String(d.get(k)||'')});
+ const r=await fetch('https://firestore.googleapis.com/v1/projects/'+FS_PID+'/databases/(default)/documents/orders?key='+FS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{name:v('name'),email:v('email'),phone:v('phone'),service:v('service'),message:v('message'),createdAt:{stringValue:new Date().toISOString()}}})});
+ return r.ok}
+function wire(f,thanks,label,toCrm){
  f.onsubmit=async e=>{e.preventDefault();const ok=$('.ok',f),bt=$('button[type=submit]',f),d=new FormData(f);
   if(d.get('_gotcha'))return;d.delete('_gotcha');
   bt.disabled=true;ok.textContent='Sending...';
-  const res=await sendAll(d);
+  const [mail,crm]=await Promise.all([sendAll(d),toCrm?saveOrder(d).catch(()=>false):Promise.resolve(false)]);
+  const res={ok:mail.ok||crm,errs:mail.errs||[]};
   if(res.ok){f.reset();ok.textContent=thanks}
   else{ok.textContent='Sorry, your message could not be sent right now. Please try again in a minute, or message me on ';
    const a=document.createElement('a');a.href=WA_URL;a.target='_blank';a.rel='noopener';a.textContent='WhatsApp';a.style.textDecoration='underline';ok.append(a,'.');
@@ -304,7 +310,7 @@ function wire(f,thanks,label){
 $$('.cf').forEach(f=>{f.innerHTML=`<label>Name<input name="name" required autocomplete="name"></label><label>Email<input name="email" type="email" required autocomplete="email"></label><label>Message<textarea name="message" required></textarea></label><input type="hidden" name="subject" value="New message from portfolio website">${HP}<button class="btn p" type="submit">Send message</button><p class="ok" role="status"></p>`;
  wire(f,'Thank you! Your message has been sent. I will reply within one working day.','Message')});
 $$('.of').forEach(f=>{f.innerHTML=`<label>Name<input name="name" required autocomplete="name"></label><label>Email<input name="email" type="email" required autocomplete="email"></label><label>Phone number<input name="phone" type="tel" required autocomplete="tel" placeholder="e.g. +1 555 123 4567"></label><label>Service<select name="service" required><option value="" disabled selected>Select a service</option>${SV.map(v=>`<option>${v}</option>`).join('')}</select></label><label>Project brief<textarea name="message" required placeholder="Tell me about your business or project, what you need, the style you like and your deadline."></textarea></label><input type="hidden" name="subject" value="New ORDER request from portfolio website">${HP}<button class="btn p" type="submit">Place order</button><p class="ok" role="status"></p>`;
- wire(f,'Thank you! Your order request has been received. I will reply within one working day with a quote.','Order request')});
+ wire(f,'Thank you! Your order request has been received. I will reply within one working day with a quote.','Order request',true)});
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;e.target.classList.add('in');io.unobserve(e.target);
  $$('[data-n]',e.target).forEach(c=>{const t=+c.dataset.n,s=c.dataset.s||'',st=performance.now();(function f(n){const p=Math.min((n-st)/1400,1);c.textContent=Math.round(t*(1-Math.pow(1-p,3))).toString().padStart(t<10?2:1,'0')+s;if(p<1)requestAnimationFrame(f)})(st)})}),{threshold:.15});
 function route(){go(location.hash.slice(1)||'home')}
