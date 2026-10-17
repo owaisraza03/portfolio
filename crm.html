@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Client CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0c10;--surf:#15151b;--surf2:#1d1d26;--line:#272732;--tx:#ececf1;--mut:#9b9bad;--ac:#3d4cff;--ac2:#b9bfff;--ok:#38d39f;--warn:#ffb84d;--bad:#ff6b7a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f5f5f9;--surf:#fff;--surf2:#ececf3;--line:#dcdce8;--tx:#14141c;--mut:#5c5c70;--ac:#3040f0;--ac2:#3040f0;--ok:#0f9a6c;--warn:#b36b00;--bad:#d6283f}}
+:root[data-theme="light"]{--bg:#f5f5f9;--surf:#fff;--surf2:#ececf3;--line:#dcdce8;--tx:#14141c;--mut:#5c5c70;--ac:#3040f0;--ac2:#3040f0;--ok:#0f9a6c;--warn:#b36b00;--bad:#d6283f}
+:root[data-theme="dark"]{--bg:#0c0c10;--surf:#15151b;--surf2:#1d1d26;--line:#272732;--tx:#ececf1;--mut:#9b9bad;--ac:#3d4cff;--ac2:#b9bfff}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 120px)}
+*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
+body{background:var(--bg);color:var(--tx);font-family:'Space Grotesk',system-ui,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:8px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.bar,.tabs,main{max-width:1240px;margin:0 auto;padding-left:20px;padding-right:20px}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:14px;padding-bottom:10px}
+h1{font-size:22px;font-weight:700;letter-spacing:-.01em}.bar small{color:var(--mut);font-size:13px}
+.act{display:flex;gap:8px}
+.b{border:0;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;transition:transform .2s,background .2s}.b:active{transform:scale(.97)}
+.b.p{background:var(--ac);color:#fff}.b.s{background:var(--surf2);border:1px solid var(--line)}.b.d{background:transparent;color:var(--bad);border:1px solid var(--line)}.b.sm{padding:6px 12px;font-size:14px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px}
+.tabs button{border:1px solid var(--line);background:var(--surf);color:var(--mut);padding:8px 16px;border-radius:99px;cursor:pointer;white-space:nowrap;font-weight:500}
+.tabs button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+main{padding-top:24px;padding-bottom:80px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:28px}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:20px}
+.stat small{color:var(--mut);font-size:14px}.stat b{display:block;font-size:34px;line-height:1.15;margin-top:6px;font-weight:600}.stat span{color:var(--mut);font-size:13px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+h2{font-size:17px;font-weight:600;margin-bottom:14px}
+.list{display:grid;gap:8px}
+.it{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surf2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.it:hover{border-color:var(--ac)}.it div small{display:block;color:var(--mut);font-size:13px}
+.chip{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--surf2);border:1px solid var(--line);color:var(--mut);white-space:nowrap}
+.chip.ok{color:var(--ok)}.chip.warn{color:var(--warn)}.chip.bad{color:var(--bad)}.chip.ac{color:var(--ac2)}
+.tool{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.tool input,.tool select{flex:1;min-width:150px}
+input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac)}textarea{min-height:90px;resize:vertical}
+.board{display:flex;gap:14px;overflow-x:auto;padding-bottom:14px;scroll-snap-type:x proximity}
+.col{flex:0 0 280px;scroll-snap-align:start;background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:14px;align-self:flex-start}
+.col h3{font-size:14px;margin-bottom:12px;display:flex;justify-content:space-between;color:var(--mut);font-weight:600}
+.kc{background:var(--surf2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;cursor:pointer}.kc:hover{border-color:var(--ac)}
+.kc b{display:block}.kc .m{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:640px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font-size:15px}th{color:var(--mut);font-weight:500;font-size:13px}tr[data-id]{cursor:pointer}tr[data-id]:hover{background:var(--surf2)}
+.empty{color:var(--mut);padding:30px;text-align:center;border:1px dashed var(--line);border-radius:14px}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(5,5,9,.7);display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 14px 16px;overflow-y:auto}.modal[hidden]{display:none}
+.sheet{background:var(--surf);border:1px solid var(--line);border-radius:20px;padding:22px;width:100%;max-width:640px;animation:up .3s cubic-bezier(.2,.7,.2,1)}
+@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:grid;gap:6px;font-size:13px;color:var(--mut);margin-bottom:12px}
+.log{display:grid;gap:6px;margin:6px 0 14px;font-size:14px;color:var(--mut);max-height:150px;overflow-y:auto}.log div b{color:var(--tx);font-weight:500}
+.foot{display:flex;justify-content:space-between;gap:10px;margin-top:8px}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);background:var(--surf2);border:1px solid var(--line);padding:10px 18px;border-radius:99px;z-index:60;font-size:14px}#toast[hidden]{display:none}
+@media (max-width:760px){.two,.g2{grid-template-columns:1fr}.stat b{font-size:28px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="bar"><div><h1>Client CRM</h1><small id="sync">Loading…</small></div><div class="act"><button class="b s" id="out" hidden>Sign out</button><button class="b s" id="exp" hidden>Export CSV</button><button class="b p" id="add">+ Add client</button></div></div>
+<nav class="tabs" id="tabs" aria-label="Sections"><button data-t="dash" class="on">Dashboard</button><button data-t="pipe">Pipeline</button><button data-t="proj">Projects</button><button data-t="pay">Payments</button></nav></header>
+<main id="v"></main>
+<div class="modal" id="m" hidden role="dialog" aria-modal="true" aria-label="Client details"></div>
+<div id="toast" hidden role="status"></div>
+<script>
+/* ===== Firebase: paste your web app config object here (or leave null to use the built-in storage) ===== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyARVMYrFfFqcd5SNltIYSAgERjek4yxlSc",
+  authDomain: "crm-database-4df53.firebaseapp.com",
+  projectId: "crm-database-4df53",
+  storageBucket: "crm-database-4df53.firebasestorage.app",
+  messagingSenderId: "874033896397",
+  appId: "1:874033896397:web:65fb7f75f34e3356a74284",
+  measurementId: "G-K4P3ZV30FL"
+};
+const ALLOWED_EMAIL = 'owaisraza0334@gmail.com';
+const ST=['Lead','Replied','Quote sent','Ordered','Lost'];
+const PS=['Pending','To-Do','In Progress','Completed','Closed','Refund'];
+const SV=['Brand Identity','Web Design','Social Media Posters','Book Cover','Other'];
+const SRC=['Outreach','Website order','Fiverr','Upwork','Referral','Other'];
+const CUR=['USD','PKR','GBP','EUR'];
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const days=d=>Math.round((new Date(d+'T00:00:00')-new Date(today()+'T00:00:00'))/864e5);
+const money=(n,c)=>{try{return new Intl.NumberFormat('en',{style:'currency',currency:c||'USD',maximumFractionDigits:0}).format(n||0)}catch(_){return (n||0)+' '+c}};
+const num=v=>Math.max(0,parseFloat(v)||0);
+let rows=[],view='dash',q='',fs='',outOnly=false,db=null,DL=null,editId=null,FB=null,unsub=null,authMsg='';
+const ids=()=>'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function norm(r){const m={'In progress':'In Progress','Delivered':'Completed','Paid':'Closed'};return m[r.stage]?{...r,stage:'Ordered',pstatus:r.pstatus||m[r.stage]}:r}
+const pst=r=>r.pstatus||(r.stage==='Ordered'?'Pending':'');
+const open=r=>r.stage!=='Lost'&&!['Closed','Refund'].includes(pst(r));
+const bal=r=>Math.max(num(r.quote)-num(r.received),0);
+function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)}
+function sumBy(list,fn){const m={};list.forEach(r=>{const c=r.currency||'USD';m[c]=(m[c]||0)+fn(r)});return Object.entries(m).filter(e=>e[1]>0).map(([c,v])=>money(v,c)).join(' · ')||'—'}
+/* ---------- storage ---------- */
+async function put(r){
+ const {id,...d0}=r;const data=JSON.parse(JSON.stringify(d0));data.updated=Date.now();
+ try{
+  if(FB)await FB.Fs.setDoc(FB.Fs.doc(FB.fs,'clients',id),data);
+  else if(db)await db.doc(id).set(data);
+  else{const i=rows.findIndex(x=>x.id===id);const n={id,...data};if(i<0)rows.push(n);else rows[i]=n;try{localStorage.setItem('crm_rows',JSON.stringify(rows))}catch(_){}render()}
+  return true}catch(e){toast('Could not save: '+(e.code||'error'));return false}}
+async function del(id){
+ try{if(FB)await FB.Fs.deleteDoc(FB.Fs.doc(FB.fs,'clients',id));else if(db)await db.doc(id).delete();else{rows=rows.filter(x=>x.id!==id);try{localStorage.setItem('crm_rows',JSON.stringify(rows))}catch(_){}render()}return true}
+ catch(e){toast('Could not delete: '+(e.code||'error'));return false}}
+async function initFirebase(){
+ $('#sync').textContent='Connecting to Firebase…';view='login';render();
+ try{
+  const B='https://www.gstatic.com/firebasejs/10.12.2/';
+  const [A,Au,Fs]=await Promise.all([import(B+'firebase-app.js'),import(B+'firebase-auth.js'),import(B+'firebase-firestore.js')]);
+  const app=A.initializeApp(FIREBASE_CONFIG),auth=Au.getAuth(app),fs=Fs.getFirestore(app);
+  FB={Au,Fs,auth,fs};$('#sync').textContent='Please sign in';
+  Au.onAuthStateChanged(auth,u=>{
+   if(unsub){unsub();unsub=null}
+   if(!u){view='login';rows=[];$('#out').hidden=true;render();return}
+   if(u.email!==ALLOWED_EMAIL){authMsg='This account is not allowed: '+u.email;Au.signOut(auth);return}
+   authMsg='';$('#out').hidden=false;$('#sync').textContent='Synced with Firebase · '+u.email;
+   if(view==='login')view='dash';
+   unsub=Fs.onSnapshot(Fs.collection(fs,'clients'),s=>{rows=s.docs.map(x=>norm({id:x.id,...x.data()}));render()},e=>toast('Could not load data ('+(e.code||'error')+')'));
+  });
+ }catch(e){$('#sync').textContent='Firebase could not start';authMsg='Firebase error: '+(e.code||e.message);render()}
+ try{DL=window.claude&&await window.claude.use('downloads');if(DL)$('#exp').hidden=false}catch(_){}
+}
+async function signIn(){const {Au,auth}=FB;try{await Au.signInWithPopup(auth,new Au.GoogleAuthProvider())}catch(e){
+ if(['auth/popup-blocked','auth/cancelled-popup-request'].includes(e.code))Au.signInWithRedirect(auth,new Au.GoogleAuthProvider());else{authMsg='Sign-in failed: '+(e.code||e.message);render()}}}
+async function init(){
+ if(FIREBASE_CONFIG)return initFirebase();
+ let d=null;try{d=window.claude&&await window.claude.use('db')}catch(_){}
+ if(d){db=d.collection('clients');
+  db.onSnapshot(s=>{rows=s.docs.map(x=>norm({id:x.id,...x.data()}));render()},e=>toast('Could not load data ('+e.code+')'));
+  $('#sync').textContent='Saved to your account · works on phone and computer'}
+ else{try{rows=JSON.parse(localStorage.getItem('crm_rows')||'[]').map(norm)}catch(_){rows=[]}
+  $('#sync').textContent='Saved on this device only';render()}
+ try{DL=window.claude&&await window.claude.use('downloads');if(DL)$('#exp').hidden=false}catch(_){}}
+/* ---------- views ---------- */
+function followChip(r){if(!r.followUp||!open(r))return '';const n=days(r.followUp);
+ return n<0?`<span class="chip bad">Follow-up overdue</span>`:n===0?`<span class="chip warn">Follow up today</span>`:`<span class="chip">Follow up ${esc(r.followUp.slice(5))}</span>`}
+function dlChip(r){if(!r.deadline)return '';const n=days(r.deadline);
+ return n<0?`<span class="chip bad">${-n}d overdue</span>`:n===0?`<span class="chip warn">Due today</span>`:`<span class="chip ${n<=3?'warn':'ac'}">${n}d left</span>`}
+function item(r,sub,right){return `<button class="it" data-id="${r.id}"><div><b>${esc(r.name)}</b><small>${esc(sub)}</small></div><div>${right}</div></button>`}
+function dash(){
+ const leads=rows.filter(r=>['Lead','Replied','Quote sent'].includes(r.stage)),act=rows.filter(r=>['Pending','To-Do','In Progress'].includes(pst(r)));
+ const brk=['Pending','To-Do','In Progress'].map(k=>k+' '+act.filter(r=>pst(r)===k).length).join(' · ');
+ const fu=rows.filter(r=>open(r)&&r.followUp&&r.followUp<=today()).sort((a,b)=>a.followUp.localeCompare(b.followUp));
+ const dl=act.filter(r=>r.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline)).slice(0,6);
+ const live=rows.filter(r=>r.stage!=='Lost'&&pst(r)!=='Refund');
+ return `<div class="stats">
+ <div class="card stat"><small>Open leads</small><b>${leads.length}</b><span>Lead, replied or quote sent</span></div>
+ <div class="card stat"><small>Active projects</small><b>${act.length}</b><span>${brk}</span></div>
+ <div class="card stat"><small>Follow-ups due</small><b>${fu.length}</b><span>Today or overdue</span></div>
+ <div class="card stat"><small>Still to receive</small><b style="font-size:22px;margin-top:12px">${esc(sumBy(live,bal))}</b><span>Received: ${esc(sumBy(live,r=>num(r.received)))}</span></div></div>
+ <div class="two"><div class="card"><h2>Follow-ups due</h2><div class="list">${fu.map(r=>item(r,r.service+' · '+r.stage,followChip(r))).join('')||'<div class="empty">Nothing to follow up today.</div>'}</div></div>
+ <div class="card"><h2>Upcoming deadlines</h2><div class="list">${dl.map(r=>item(r,(r.project||r.service),dlChip(r))).join('')||'<div class="empty">No active deadlines.</div>'}</div></div></div>
+ ${rows.length?'':'<div class="empty" style="margin-top:24px">No clients yet. Tap <b>+ Add client</b> to save your first lead or order.</div>'}`}
+function filt(){const t=q.trim().toLowerCase();return rows.filter(r=>(!fs||r.service===fs)&&(!t||[r.name,r.project,r.contact,r.notes].join(' ').toLowerCase().includes(t)))}
+function tools(){return `<div class="tool"><input id="q" type="search" placeholder="Search name, project or contact" value="${esc(q)}" aria-label="Search"><select id="fs" aria-label="Service"><option value="">All services</option>${SV.map(s=>`<option ${s===fs?'selected':''}>${s}</option>`).join('')}</select></div>`}
+function pipe(){
+ const list=filt();
+ return tools()+`<div class="board">${ST.map((s,i)=>{const c=list.filter(r=>r.stage===s);
+ return `<div class="col"><h3><span>${s}</span><span>${c.length}</span></h3>${c.map(r=>`<div class="kc" data-id="${r.id}" tabindex="0" role="button"><b>${esc(r.name)}</b><small class="chip" style="margin-top:6px">${esc(r.service)}</small>
+ <div class="m">${num(r.quote)?`<span class="chip ac">${money(r.quote,r.currency)}</span>`:''}${followChip(r)}${dlChip(r)}</div>
+ ${i<3?`<button class="b s sm" style="margin-top:10px" data-next="${r.id}">Move to ${ST[i+1]} →</button>`:''}</div>`).join('')||'<div class="mut" style="color:var(--mut);font-size:14px">Empty</div>'}</div>`}).join('')}</div>`}
+function proj(){
+ const list=filt().filter(r=>pst(r)).sort((a,b)=>(a.deadline||'9').localeCompare(b.deadline||'9'));
+ return tools()+(list.length?'':'<div class="empty" style="margin-bottom:16px">No projects yet. Move a client to <b>Ordered</b> in the Pipeline and it will appear here under <b>Pending</b>.</div>')+`<div class="board">${PS.map((s,i)=>{const c=list.filter(r=>pst(r)===s);
+ return `<div class="col"><h3><span>${s}</span><span>${c.length}</span></h3>${c.map(r=>`<div class="kc" data-id="${r.id}" tabindex="0" role="button"><b>${esc(r.name)}</b><small class="chip" style="margin-top:6px">${esc(r.project||r.service)}</small>
+ <div class="m">${i<3?dlChip(r):''}${bal(r)&&i!==5?`<span class="chip warn">Balance ${money(bal(r),r.currency)}</span>`:''}</div>
+ <div class="m" style="margin-top:10px">${i>0&&i<5?`<button class="b s sm" data-pn="${r.id}|-1">← ${PS[i-1]}</button>`:''}${i<4?`<button class="b s sm" data-pn="${r.id}|1">${PS[i+1]} →</button>`:''}</div></div>`).join('')||'<div style="color:var(--mut);font-size:14px">Empty</div>'}</div>`}).join('')}</div>`}
+function pay(){
+ let l=filt().filter(r=>r.stage!=='Lost'&&pst(r)!=='Refund'&&(num(r.quote)||num(r.received)));if(outOnly)l=l.filter(r=>bal(r)>0);
+ const st=r=>num(r.quote)&&num(r.received)>=num(r.quote)?'<span class="chip ok">Paid</span>':num(r.received)?'<span class="chip warn">Advance received</span>':'<span class="chip bad">Unpaid</span>';
+ return tools()+`<div class="stats"><div class="card stat"><small>Total quoted</small><b style="font-size:22px">${esc(sumBy(l,r=>num(r.quote)))}</b></div><div class="card stat"><small>Received</small><b style="font-size:22px">${esc(sumBy(l,r=>num(r.received)))}</b></div><div class="card stat"><small>Pending balance</small><b style="font-size:22px">${esc(sumBy(l,bal))}</b></div></div>
+ <label style="display:flex;gap:10px;align-items:center;flex-direction:row;font-size:15px;color:var(--tx)"><input type="checkbox" id="oo" style="width:auto" ${outOnly?'checked':''}>Show only clients with a balance</label>
+ <div class="card tw">${l.length?`<table><thead><tr><th>Client</th><th>Quote</th><th>Received</th><th>Balance</th><th>Status</th></tr></thead><tbody>${l.map(r=>`<tr data-id="${r.id}"><td><b>${esc(r.name)}</b><br><small style="color:var(--mut)">${esc(r.project||r.service)}</small></td><td>${money(r.quote,r.currency)}</td><td>${money(r.received,r.currency)}</td><td>${money(bal(r),r.currency)}</td><td>${st(r)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No payments to show yet. Add a quote to a client.</div>'}</div>`}
+function render(){
+ const lg=view==='login';$('#tabs').hidden=lg;$('#add').hidden=lg;
+ if(lg){$('#v').innerHTML=`<div class="card" style="max-width:440px;margin:40px auto;text-align:center"><h2>Sign in to your CRM</h2><p style="color:var(--mut);margin-bottom:20px">Only the Google account <b style="color:var(--tx)">${esc(ALLOWED_EMAIL)}</b> can open this.</p><button class="b p" id="gs" ${FB?'':'disabled'}>Sign in with Google</button><p style="color:var(--bad);margin-top:14px;font-size:14px">${esc(authMsg)}</p></div>`;return}
+ const f={dash,pipe,proj,pay}[view];const keep=document.activeElement&&document.activeElement.id==='q';
+ $('#v').innerHTML=f();
+ $('#tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===view));
+ if(keep){const i=$('#q');i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
+/* ---------- modal ---------- */
+function openM(id){
+ editId=id;const r=rows.find(x=>x.id===id)||{stage:'Lead',service:SV[0],source:SRC[0],currency:'USD',log:[]};
+ const o=(a,v)=>a.map(x=>`<option ${x===v?'selected':''}>${x}</option>`).join('');
+ $('#m').innerHTML=`<form class="sheet" id="f"><div class="foot" style="margin:0 0 14px"><h2 style="margin:0">${id?'Edit client':'Add client'}</h2><button type="button" class="b s sm" id="x">Close</button></div>
+ <label>Client name<input name="name" required value="${esc(r.name)}" autocomplete="off"></label>
+ <label>Email / phone / WhatsApp<input name="contact" value="${esc(r.contact)}" autocomplete="off"></label>
+ <div class="g2"><label>Service<select name="service">${o(SV,r.service)}</select></label><label>Source<select name="source">${o(SRC,r.source)}</select></label></div>
+ <div class="g2"><label>Sales stage<select name="stage">${o(ST,r.stage)}</select></label><label>Project status<select name="pstatus"><option value="">Not started</option>${o(PS,pst(r))}</select></label></div>
+ <label>Project title<input name="project" value="${esc(r.project)}" autocomplete="off"></label>
+ <div class="g2"><label>Next follow-up<input type="date" name="followUp" value="${esc(r.followUp)}"></label><label>Deadline<input type="date" name="deadline" value="${esc(r.deadline)}"></label></div>
+ <div class="g2"><label>Currency<select name="currency">${o(CUR,r.currency)}</select></label><label>Quoted price<input type="number" min="0" step="any" name="quote" value="${esc(r.quote||'')}"></label></div>
+ <div class="g2"><label>Received so far<input type="number" min="0" step="any" name="received" value="${esc(r.received||'')}"></label><label>Add a payment now<input type="number" min="0" step="any" name="addpay" placeholder="e.g. advance amount"></label></div>
+ <label>Notes<textarea name="notes">${esc(r.notes)}</textarea></label>
+ <label>Add an activity note<input name="note" placeholder="e.g. Sent logo concepts on WhatsApp" autocomplete="off"></label>
+ ${(r.log||[]).length?`<div class="log">${[...r.log].reverse().map(l=>`<div><b>${esc(l.d)}</b> · ${esc(l.t)}</div>`).join('')}</div>`:''}
+ <div class="foot">${id?'<button type="button" class="b d" id="dl">Delete</button>':'<span></span>'}<button class="b p" type="submit">Save</button></div></form>`;
+ $('#m').hidden=false;document.body.style.overflow='hidden';$('#f').name.focus()}
+function closeM(){$('#m').hidden=true;document.body.style.overflow='';editId=null}
+async function save(e){
+ e.preventDefault();const f=e.target,old=rows.find(x=>x.id===editId)||{},g=n=>f.elements[n].value.trim();
+ const r={...old,id:editId||ids(),name:g('name'),contact:g('contact'),service:g('service'),source:g('source'),stage:g('stage'),pstatus:g('pstatus'),project:g('project'),followUp:g('followUp'),deadline:g('deadline'),currency:g('currency'),quote:num(g('quote')),received:num(g('received')),notes:g('notes'),created:old.created||Date.now(),log:[...(old.log||[])]};
+ if(r.stage==='Ordered'&&!r.pstatus)r.pstatus='Pending';
+ const log=t=>r.log.push({d:today(),t});
+ if(!editId)log('Added as '+r.stage+' via '+r.source);else {if(old.stage!==r.stage)log('Stage: '+old.stage+' → '+r.stage);if(pst(old)!==pst(r))log('Project: '+(pst(old)||'—')+' → '+(pst(r)||'—'))}
+ const ap=num(g('addpay'));if(ap){r.received+=ap;log('Payment received: '+money(ap,r.currency))}
+ if(g('note'))log(g('note'));
+ if(await put(r)){closeM();toast('Saved')}}
+/* ---------- events ---------- */
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(b){view=b.dataset.t;render()}};
+$('#add').onclick=()=>openM(null);
+$('#v').onclick=async e=>{
+ const n=e.target.closest('[data-next]');
+ if(n){e.stopPropagation();const r=rows.find(x=>x.id===n.dataset.next);const to=ST[ST.indexOf(r.stage)+1];await put({...r,stage:to,...(to==='Ordered'&&!pst(r)?{pstatus:'Pending'}:{}),log:[...(r.log||[]),{d:today(),t:'Stage: '+r.stage+' → '+to}]});toast('Moved to '+to);return}
+ const pn=e.target.closest('[data-pn]');
+ if(pn){e.stopPropagation();const [id,dr]=pn.dataset.pn.split('|');const r=rows.find(x=>x.id===id),i=PS.indexOf(pst(r)),to=PS[i+Number(dr)];await put({...r,pstatus:to,log:[...(r.log||[]),{d:today(),t:'Project: '+PS[i]+' → '+to}]});toast('Moved to '+to);return}
+ if(e.target.id==='gs'){signIn();return}
+ const c=e.target.closest('[data-id]');if(c)openM(c.dataset.id)};
+$('#out').onclick=()=>{FB&&FB.Au.signOut(FB.auth)};
+$('#v').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('kc')){e.preventDefault();openM(e.target.dataset.id)}};
+$('#v').oninput=e=>{if(e.target.id==='q'){q=e.target.value;render()}};
+$('#v').onchange=e=>{if(e.target.id==='fs'){fs=e.target.value;render()}if(e.target.id==='oo'){outOnly=e.target.checked;render()}};
+$('#m').onclick=async e=>{
+ if(e.target.id==='m'||e.target.id==='x')return closeM();
+ if(e.target.id==='dl'){const b=e.target;if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap again to delete';return}if(await del(editId)){closeM();toast('Deleted')}}};
+$('#m').onsubmit=save;
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#m').hidden)closeM()});
+$('#exp').onclick=async()=>{
+ const h=['Name','Contact','Service','Source','Sales stage','Project status','Project','Follow-up','Deadline','Currency','Quote','Received','Balance','Notes'];
+ const cs=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+ const csv=[h.map(cs).join(',')].concat(rows.map(r=>[r.name,r.contact,r.service,r.source,r.stage,pst(r),r.project,r.followUp,r.deadline,r.currency,r.quote,r.received,bal(r),r.notes].map(cs).join(','))).join('\n');
+ try{await DL.save({filename:'clients.csv',data:csv})}catch(_){}};
+render();init();
+</script>
+</body>
+</html>
