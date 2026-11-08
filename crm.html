@@ -58,13 +58,48 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac)}text
 @media (max-width:760px){.two,.g2{grid-template-columns:1fr}.stat b{font-size:28px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
-</head>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,600..900,0..100,0..1;1,9..144,600..900,0..100,0..1&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200..700&display=swap" rel="stylesheet"><style id="v2">
+:root{--bg:#170d2b;--surf:#22153f;--surf2:#2c1d52;--line:rgba(201,184,255,.16);--tx:#f4ecff;--mut:#b4a5d8;--ac:#5b45f5;--ac2:#cdbdff;--ok:#6fe0b8;--warn:#ffd27a;--bad:#ff8aa0}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#e4f3ea;--surf:#fff;--surf2:#eff8f2;--line:#c6dfd1;--tx:#243a33;--mut:#5f736a;--ac:#4b3df0;--ac2:#4b3df0;--ok:#0f8f66;--warn:#a86400;--bad:#cf2c47}}
+:root[data-theme="light"]{--bg:#e4f3ea;--surf:#fff;--surf2:#eff8f2;--line:#c6dfd1;--tx:#243a33;--mut:#5f736a;--ac:#4b3df0;--ac2:#4b3df0;--ok:#0f8f66;--warn:#a86400;--bad:#cf2c47}
+:root[data-theme="dark"]{--bg:#170d2b;--surf:#22153f;--surf2:#2c1d52;--line:rgba(201,184,255,.16);--tx:#f4ecff;--mut:#b4a5d8;--ac:#5b45f5;--ac2:#cdbdff}
+body{font-family:'Outfit',system-ui,sans-serif;font-weight:300;font-size:17px;background:radial-gradient(60% 40% at 15% 0,rgba(91,69,245,.18) 0,transparent 70%),var(--bg);background-attachment:fixed}
+button,input,select,textarea{font-family:inherit}
+h1,.stat b{font-family:'Fraunces',serif;font-variation-settings:"SOFT" 100,"WONK" 1;font-weight:800;letter-spacing:-.03em}
+h1{font-size:28px}
+h2{font-family:'Outfit',sans-serif;font-weight:400;font-size:20px;letter-spacing:-.01em}
+.stat b{font-size:44px;font-weight:700}
+.top{background:color-mix(in srgb,var(--bg) 82%,transparent)}
+.card{border-radius:22px;padding:24px}
+.b{border-radius:99px;padding:11px 22px;font-weight:500}
+.b.sm{padding:7px 16px}
+.tabs button{font-weight:400;padding:9px 20px}
+.tabs button.on{box-shadow:0 8px 24px -10px var(--ac)}
+.it,.kc,input,select,textarea{border-radius:14px}
+.col{border-radius:20px}
+.chip{font-weight:500}
+.stat small,.bar small,th{letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+.brand h1{font-size:clamp(20px,2.4vw,28px);line-height:1.05}
+.sub{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:3px}
+.sub small{display:block}
+.ft{background:#120a23;color:#b4a5d8;padding:clamp(50px,7vw,90px) 20px 40px;margin-top:40px}
+.ft>*{max-width:1240px;margin-left:auto;margin-right:auto}
+.wm{font:italic 800 clamp(42px,11vw,150px)/.9 'Fraunces',serif;font-variation-settings:"SOFT" 100,"WONK" 1;letter-spacing:-.035em;color:rgba(201,184,255,.16);margin-bottom:40px}
+.wm em{font-style:italic}
+.ft small{display:block;font-size:13px;color:#b4a5d8}
+#cur{position:fixed;top:0;left:0;width:14px;height:14px;margin:-7px;border-radius:50%;background:#cdbdff;z-index:9999;pointer-events:none;opacity:0;transition:opacity .3s,width .3s,height .3s,margin .3s}
+#cur.on{opacity:.9}#cur.big{width:44px;height:44px;margin:-22px;opacity:.5}
+#cur.lt{background:#3b1d8f}
+@media (pointer:coarse){#cur{display:none}}
+</style></head>
 <body>
-<header class="top"><div class="bar"><div><h1>Client CRM</h1><small id="sync">Loading…</small></div><div class="act"><button class="b s" id="out" hidden>Sign out</button><button class="b s" id="exp" hidden>Export CSV</button><button class="b p" id="add">+ Add client</button></div></div>
+<header class="top"><div class="bar"><div class="brand"><h1>Muhammad Owais Raza</h1><div class="sub"><small>Client CRM · Brands with a little care.</small><small id="sync">Loading…</small></div></div><div class="act"><button class="b s" id="out" hidden>Sign out</button><button class="b s" id="exp" hidden>Export CSV</button><button class="b p" id="add">+ Add client</button></div></div>
 <nav class="tabs" id="tabs" aria-label="Sections"><button data-t="dash" class="on">Dashboard</button><button data-t="pipe">Pipeline</button><button data-t="proj">Projects</button><button data-t="pay">Payments</button></nav></header>
 <main id="v"></main>
 <div class="modal" id="m" hidden role="dialog" aria-modal="true" aria-label="Client details"></div>
 <div id="toast" hidden role="status"></div>
+<footer class="ft"><div class="wm"><em>Muhammad<br>Owais Raza</em></div><small>© 2026 Muhammad Owais Raza · Client CRM</small></footer>
+<div id="cur"></div>
 <script>
 /* ===== Firebase: paste your web app config object here (or leave null to use the built-in storage) ===== */
 const FIREBASE_CONFIG = {
@@ -248,6 +283,11 @@ $('#exp').onclick=async()=>{
  const csv=[h.map(cs).join(',')].concat(rows.map(r=>[r.name,r.contact,r.service,r.source,r.stage,pst(r),r.project,r.followUp,r.deadline,r.currency,r.quote,r.received,bal(r),r.notes].map(cs).join(','))).join('\n');
  try{await DL.save({filename:'clients.csv',data:csv})}catch(_){}};
 render();init();
+{let lx=0,ly=0;const cur=$('#cur');
+const lum=()=>{const m=getComputedStyle(document.body).backgroundColor.match(/[\d.]+/g)||[0,0,0];return (.299*m[0]+.587*m[1]+.114*m[2])/255};
+const tone=()=>{const el=document.elementFromPoint(lx,ly);cur.classList.toggle('lt',lum()>.55&&!(el&&el.closest('.ft')))};
+addEventListener('mousemove',e=>{lx=e.clientX;ly=e.clientY;cur.classList.add('on');cur.style.transform=`translate(${lx}px,${ly}px)`;cur.classList.toggle('big',!!e.target.closest('a,button,.it,.kc,tr'));tone()});
+addEventListener('scroll',tone,{passive:true});}
 </script>
 </body>
 </html>
